@@ -26,6 +26,7 @@ pandoc_include = """
 body { margin: 1em 2em; background-color: floralwhite; }
 h1 { border-bottom: 1px solid silver; }
 h2 { border-bottom: 1px solid silver; }
+img { max-width: 100% }
 pre:has(code) { background-color:#eeeeee; padding:1em; }
 table { border-collapse: collapse; }
 thead { border-bottom: 1px solid gray; }
