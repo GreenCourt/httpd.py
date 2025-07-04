@@ -11,6 +11,7 @@ import socket
 class Handler(SimpleHTTPRequestHandler):
     index_pages: list[str] = []  # clear index_pages to ignore index.html
     user_pass = ""
+    url_prefix = ""
 
     # def log_message(self, format, *args):
     #    pass
@@ -39,6 +40,12 @@ class Handler(SimpleHTTPRequestHandler):
             return False
 
         return True
+
+    def translate_path(self, path: str):
+        if self.url_prefix and path.startswith(self.url_prefix):
+            # remove url_prefix from path
+            path = path[len(self.url_prefix) :] or "/"
+        return super().translate_path(path)
 
     def do_HEAD(self):
         if not self._authorized():
@@ -88,6 +95,7 @@ if __name__ == "__main__":
     parser.add_argument("-b", "--bind", type=str, default="127.0.0.1")
     parser.add_argument("-p", "--port", type=int, default=8000)
     parser.add_argument("--dir", "--directory", type=Path, default=None)
+    parser.add_argument("--url-prefix", type=str, default="")
     parser.add_argument("--daemon", action="store_true")
     parser.add_argument("--auth", type=str, default="", help="user:pass")
     parser.add_argument("--log", type=Path, default="/dev/null")
@@ -105,6 +113,13 @@ if __name__ == "__main__":
 
     if args.auth:
         Handler.user_pass = args.auth
+
+    if args.url_prefix:
+        Handler.url_prefix = (
+            args.url_prefix
+            if args.url_prefix and args.url_prefix[0] == "/"
+            else ("/" + args.url_prefix)
+        )
 
     with ThreadingHTTPServer((args.bind, args.port), Handler) as s:
         print(f"listening at {s.server_address[0]}:{s.server_address[1]}")
